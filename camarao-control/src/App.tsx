@@ -28,6 +28,36 @@ function App() {
   //    Passamos nossos 'dadosIniciaisDosTanques' para que o estado comece com essa lista.
   const [tanques, setTanques] = useState(dadosIniciaisDosTanques);
 
+  //states para salvar oque estiver escrito nos inputs
+  const [novoNome, setNovoNome] = useState("");
+  const [novoStatus, setNovoStatus] = useState("");
+  const [novoLote, setNovoLot] = useState("");
+
+  // Abaixo dos useStates, mas ainda dentro da função App()
+
+  const handleAdicionarTanque = (evento: React.FormEvent) => {
+    // 1. Impede o comportamento padrão do navegador de recarregar a página
+    evento.preventDefault();
+
+    // 2. Cria o objeto do novo tanque com os dados dos estados
+    const novoTanque = {
+      id: new Date().toISOString(), // Usamos a data como um ID único simples
+      nome: novoNome,
+      status: novoStatus,
+      lote: novoLote,
+    };
+
+    // 3. A GRANDE MÁGICA: atualiza o estado dos tanques
+    //    Isso cria um NOVO array contendo todos os tanques antigos (...tanques)
+    //    mais o novoTanque no final. O React detecta essa mudança e redesenha a tela!
+    setTanques([...tanques, novoTanque]);
+
+    // 4. Limpa os campos do formulário após o envio
+    setNovoNome("");
+    setNovoStatus("");
+    setNovoLote("");
+  };
+
   return (
     <div>
       <h1>Controle de Viveiros de Camarão</h1>
