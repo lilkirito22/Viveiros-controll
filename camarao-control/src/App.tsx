@@ -3,6 +3,7 @@
 // 1. Importamos o 'useState' do React. É a nossa ferramenta para criar "memória" no componente.
 import { useState } from "react";
 import TanqueCard from "./components/TanqueCard";
+import AdicionarTanqueForm from "./components/AdicionarTanqueForm";
 
 // 2. Criamos uma interface para definir o "molde" de um tanque.
 //    Isso ajuda o TypeScript a garantir que nossos dados estejam sempre corretos.
@@ -11,6 +12,14 @@ interface Tanque {
   nome: string;
   status: string;
   lote: string;
+}
+
+interface Despesa {
+  id: string;
+  descricao: string;
+  valor: number;
+  data: string;
+  tanqueID: string;
 }
 
 const statusOptions = ["Em operação", "Vazio", "Manutenção"];
@@ -29,35 +38,28 @@ function App() {
   //    'setTanques' é a função que usaremos no futuro para ATUALIZAR a lista.
   //    Passamos nossos 'dadosIniciaisDosTanques' para que o estado comece com essa lista.
   const [tanques, setTanques] = useState(dadosIniciaisDosTanques);
-
-  //states para salvar oque estiver escrito nos inputs
-  const [novoNome, setNovoNome] = useState("");
-  const [novoStatus, setNovoStatus] = useState("");
-  const [novoLote, setNovoLote] = useState("");
+  const [despesas, setDespesas] = useState<Despesa[]>([]);
 
   // Abaixo dos useStates, mas ainda dentro da função App()
 
-  const handleAdicionarTanque = (evento: React.FormEvent) => {
-    // 1. Impede o comportamento padrão do navegador de recarregar a página
-    evento.preventDefault();
-
+  const handleAdicionarTanque = (dadosDoForm: {
+    nome: string;
+    status: string;
+    lote: string;
+  }) => {
     // 2. Cria o objeto do novo tanque com os dados dos estados
     const novoTanque = {
       id: new Date().toISOString(), // Usamos a data como um ID único simples
-      nome: novoNome,
-      status: novoStatus,
-      lote: novoLote,
+      // usando agora os dados que recebemos do filho
+      nome: dadosDoForm.nome,
+      status: dadosDoForm.status,
+      lote: dadosDoForm.lote,
     };
 
     // 3. A GRANDE MÁGICA: atualiza o estado dos tanques
     //    Isso cria um NOVO array contendo todos os tanques antigos (...tanques)
     //    mais o novoTanque no final. O React detecta essa mudança e redesenha a tela!
     setTanques([...tanques, novoTanque]);
-
-    // 4. Limpa os campos do formulário após o envio
-    setNovoNome("");
-    setNovoStatus("");
-    setNovoLote("");
   };
 
   const handleDeletarTanque = (idToDel: string) => {
@@ -84,36 +86,12 @@ function App() {
     <div>
       <h1>Controle de Viveiros de Camarão</h1>
 
-      <form onSubmit={handleAdicionarTanque}>
-        <h2>Adicionar Novo Tanque</h2>
-        <input
-          type="text"
-          placeholder="Nome do Tanque"
-          value={novoNome}
-          onChange={(e) => setNovoNome(e.target.value)}
+      <div>
+        <AdicionarTanqueForm
+          statusOptions={statusOptions}
+          onAdicionar={handleAdicionarTanque}
         />
-        <label htmlFor="status">Status:</label>
-        <select
-        id="status"
-          value={novoStatus}
-          onChange={(e) => setNovoStatus(e.target.value)}
-        >
-          <option value="">Selecione um status</option>
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          placeholder="Lote"
-          value={novoLote}
-          onChange={(e) => setNovoLote(e.target.value)}
-        />
-        <button type="submit">Adicionar Tanque</button>
-      </form>
+      </div>
 
       <hr />
 
