@@ -13,6 +13,8 @@ interface Tanque {
   lote: string;
 }
 
+const statusOptions = ["Em operação", "Vazio", "Manutenção"];
+
 function App() {
   // 3. Aqui está a nossa lista de dados, como no desafio de JS.
   const dadosIniciaisDosTanques: Tanque[] = [
@@ -31,7 +33,7 @@ function App() {
   //states para salvar oque estiver escrito nos inputs
   const [novoNome, setNovoNome] = useState("");
   const [novoStatus, setNovoStatus] = useState("");
-  const [novoLote, setNovoLot] = useState("");
+  const [novoLote, setNovoLote] = useState("");
 
   // Abaixo dos useStates, mas ainda dentro da função App()
 
@@ -58,18 +60,74 @@ function App() {
     setNovoLote("");
   };
 
+  const handleDeletarTanque = (idToDel: string) => {
+    const newTanque = tanques.filter((item) => item.id !== idToDel);
+    setTanques(newTanque);
+  };
+
+  const handleMudarStatus = (idParaMudar: string) => {
+    setTanques((prev) =>
+      prev.map((tanque) => {
+        if (tanque.id === idParaMudar) {
+          let novoStatus = "";
+          if (tanque.status == "Em operação") novoStatus = "Vazio";
+          else if (tanque.status === "Vazio") novoStatus = "Manuntenção";
+          else novoStatus = "Em operação";
+
+          return { ...tanque, status: novoStatus };
+        }
+        return tanque;
+      })
+    );
+  };
   return (
     <div>
       <h1>Controle de Viveiros de Camarão</h1>
+
+      <form onSubmit={handleAdicionarTanque}>
+        <h2>Adicionar Novo Tanque</h2>
+        <input
+          type="text"
+          placeholder="Nome do Tanque"
+          value={novoNome}
+          onChange={(e) => setNovoNome(e.target.value)}
+        />
+        <label htmlFor="status">Status:</label>
+        <select
+        id="status"
+          value={novoStatus}
+          onChange={(e) => setNovoStatus(e.target.value)}
+        >
+          <option value="">Selecione um status</option>
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="Lote"
+          value={novoLote}
+          onChange={(e) => setNovoLote(e.target.value)}
+        />
+        <button type="submit">Adicionar Tanque</button>
+      </form>
+
+      <hr />
 
       <div className="lista-de-tanques">
         {/* 5. A MÁGICA ACONTECE AQUI! */}
         {tanques.map((tanque) => (
           <TanqueCard
             key={tanque.id} // O React precisa de uma 'key' única para cada item em uma lista. Usamos o ID.
+            idDoTanque={tanque.id}
             nomeDoTanque={tanque.nome}
             status={tanque.status}
             loteAtual={tanque.lote}
+            onDelete={handleDeletarTanque}
+            onEdite={handleMudarStatus}
           />
         ))}
       </div>
