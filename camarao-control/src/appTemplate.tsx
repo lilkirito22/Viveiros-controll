@@ -1,12 +1,13 @@
-// 1. Importamos as ferramentas do React Router
-import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
-// 2. Importamos nossos novos componentes de página
-import HomePage from "./pages/HomePage";
-import FinanceiroPage from "./pages/FinanceiroPage";
+// src/App.tsx
 
-// Tipagem (Nossos "Moldes" de Dados)
-// Usamos 'export' para que outros arquivos possam importar esses moldes
+// 1. Importamos o 'useState' do React. É a nossa ferramenta para criar "memória" no componente.
+import { useState } from "react";
+import TanqueCard from "./components/TanqueCard";
+import AdicionarTanqueForm from "./components/AdicionarTanqueForm";
+import RegistrarDespesaForm from "./components/RegistrarDespesaForm";
+
+// 2. Criamos uma interface para definir o "molde" de um tanque.
+//    Isso ajuda o TypeScript a garantir que nossos dados estejam sempre corretos.
 export interface Tanque {
   id: string;
   nome: string;
@@ -14,7 +15,7 @@ export interface Tanque {
   lote: string;
 }
 
-export interface Despesa {
+interface Despesa {
   id: string;
   descricao: string;
   valor: number;
@@ -22,17 +23,25 @@ export interface Despesa {
   tanqueId: string;
 }
 
+const statusOptions = ["Em operação", "Vazio", "Manutenção"];
+
 function App() {
-  //  ESTADOS GLOBAIS
+  // 3. Aqui está a nossa lista de dados, como no desafio de JS.
   const dadosIniciaisDosTanques: Tanque[] = [
     { id: "t1", nome: "Tanque 01", status: "Em operação", lote: "LOTE-001" },
     { id: "t2", nome: "Tanque 02", status: "Vazio", lote: "Nenhum" },
+    { id: "t3", nome: "Berçário 01", status: "Manutenção", lote: "Nenhum" },
+    { id: "t4", nome: "Tanque 03", status: "Em operação", lote: "LOTE-004" },
   ];
+
+  // 4. Usamos o useState para criar nosso estado.
+  //    'tanques' é a variável que guarda a lista de dados.
+  //    'setTanques' é a função que usaremos no futuro para ATUALIZAR a lista.
+  //    Passamos nossos 'dadosIniciaisDosTanques' para que o estado comece com essa lista.
   const [tanques, setTanques] = useState(dadosIniciaisDosTanques);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
-  const statusOptions = ["Em operação", "Vazio", "Manutenção"];
 
-  // FUNÇOES DE MANIPULAÇÃO
+  // Abaixo dos useStates, mas ainda dentro da função App()
 
   const handleAdicionarTanque = (dadosDoForm: {
     nome: string;
@@ -86,67 +95,42 @@ function App() {
       tanqueId: dadosDaDespesa.tanqueId,
       descricao: dadosDaDespesa.descricao,
       data: dadosDaDespesa.data,
-      valor: parseFloat(dadosDaDespesa.valor),
+      valor: parseFloat(dadosDaDespesa.valor) ,
     };
 
     setDespesas([...despesas, novaDespesa]);
   };
-
-  const handleDeletarDespesa = (idToDell: string)=>{
-    const newDespesa = despesas.filter((item) => item.id !== idToDell);
-    setDespesas(newDespesa)
-
-  }
-
-  const handleAtualizarDespesa  = (idParaAtualizar: string, novosDados: { descricao: string, valor: number, data: string }) =>{
-    setDespesas(despesas.map(despesa => {
-    // Se encontrarmos a despesa com o ID correspondente...
-    if (despesa.id === idParaAtualizar) {
-      // ...retornamos um novo objeto com os dados antigos (...despesa)
-      // mas sobrescrevemos com os novos dados que recebemos.
-      return { ...despesa, ...novosDados };
-    }
-    // Se não for a despesa que queremos mudar, apenas a retornamos como estava.
-    return despesa;
-  }));
-  }
-  // interface
   return (
     <div>
-      {/* 3. Criamos um menu de navegação simples */}
-      <nav>
-        <Link to="/">Viveiros</Link> | <Link to="/financeiro">Financeiro</Link>
-      </nav>
+      <h1>Controle de Viveiros de Camarão</h1>
+
+      <div>
+        <AdicionarTanqueForm
+          statusOptions={statusOptions}
+          onAdicionar={handleAdicionarTanque}
+        />
+      </div>
 
       <hr />
 
-      {/* PALCO ONDE AS PAGINAS SAO TROCADAS */}
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              tanques={tanques}
-              statusOptions={statusOptions}
-              onAdicionarTanque={handleAdicionarTanque}
-              onDeletarTanque={handleDeletarTanque}
-              onMudarStatus={handleMudarStatus}
-            />
-          }
-        />
-        <Route
-          path="/financeiro"
-          element={
-            <FinanceiroPage
-              tanques={tanques}
-              despesas={despesas}
-              onRegistrarDespesa={handleRegistrarDespesa}
-              onDeletarDespesa={handleDeletarDespesa}
-              onEditarDespesa={handleAtualizarDespesa}
-            />
-          }
-        />
-      </Routes>
+      <div className="lista-de-tanques">
+        {/* 5. A MÁGICA ACONTECE AQUI! */}
+        {tanques.map((tanque) => (
+          <TanqueCard
+            key={tanque.id} // O React precisa de uma 'key' única para cada item em uma lista. Usamos o ID.
+            idDoTanque={tanque.id}
+            nomeDoTanque={tanque.nome}
+            status={tanque.status}
+            loteAtual={tanque.lote}
+            onDelete={handleDeletarTanque}
+            onEdite={handleMudarStatus}
+          />
+        ))}
+      </div>
+      <RegistrarDespesaForm
+        tanques={tanques}
+        onRegistrar={handleRegistrarDespesa}
+      />
     </div>
   );
 }
