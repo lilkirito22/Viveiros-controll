@@ -41,22 +41,40 @@ function DespesaCard({
         width: "300px",
       }}
     >
-      <h4>{descricao}</h4>
-      <p>
-        <strong>Valor:</strong>{" "}
-        {valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-      </p>
-      <p>
-        <strong>Data:</strong> {data}
-      </p>
-      <p>
-        <small>ID do Tanque: {tanqueId}</small>
-      </p>
-      <hr style={{ margin: "10px 0" }} />
-      <div>
-        <button style={{ marginRight: "10px" }}>Editar</button>
-        <button onClick={() => onDelete(id)}>Deletar</button>
-      </div>
+      {estaEditando ? (
+        // --- INÍCIO DO MODO DE EDIÇÃO ---
+        <>
+          <p>Modo de Edição Ativado!</p>
+          {/* TODO: Coloque seus <input>s e os botões "Salvar" e "Cancelar" aqui. */}
+        </>
+      ) : (
+        // --- FIM DO MODO DE EDIÇÃO ---
+
+        // --- INÍCIO DO MODO DE VISUALIZAÇÃO ---
+        <>
+          {/* TODO: Coloque o JSX que você já tinha, com o texto e os botões "Editar" e "Deletar", aqui. */}
+          <h4>{descricao}</h4>
+          <p>
+            <strong>Valor:</strong>{" "}
+            {valor.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </p>
+          <p>
+            <strong>Data:</strong> {data}
+          </p>
+          <p>
+            <small>ID do Tanque: {tanqueId}</small>
+          </p>
+          <hr style={{ margin: "10px 0" }} />
+          <div>
+            <button onClick={() => setEstaEditando(true)}>Editar</button>
+            <button onClick={() => onDelete(id)}>Deletar</button>
+          </div>
+        </>
+        // --- FIM DO MODO DE VISUALIZAÇÃO ---
+      )}
     </div>
   );
 }
