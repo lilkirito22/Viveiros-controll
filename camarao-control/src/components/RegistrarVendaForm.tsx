@@ -3,27 +3,38 @@ import { type Tanque } from "../App";
 
 type Props = {
   tanques: Tanque[];
-  onRegistrar: (dadosDaDespesa: {
-    descricao: string;
-    valor: string;
-    data: string;
+  onRegistrar: (dadosDaVenda: {
     tanqueId: string;
+    data: string;
+    pesoTotalKg: string;
+    valorTotal: string;
+    gramatura: string;
+    precoTabela: string;
   }) => void;
 };
 
-function RegistrarDespesaForm({ tanques, onRegistrar }: Props) {
+function RegistrarVendaForm({ tanques, onRegistrar }: Props) {
   // A lógica e os estados do formulário virão aqui
-  const [novoDesc, setNovoDesc] = useState("");
-  const [novoValor, setNovoValor] = useState("");
-  const [novoData, setNovoData] = useState("");
   const [tanqueSelecionadoId, setTanqueSelecionadoId] = useState("");
+  const [novoData, setNovoData] = useState("");
+  const [novoPeso, setNovoPeso] = useState("");
+  const [novoValor, setNovoValor] = useState("");
+  const [novoGram, setNovoGram] = useState("");
+  const [novoTabela, setNovoTabela] = useState("");
 
   const handleSubmit = (evento: React.FormEvent) => {
     evento.preventDefault();
 
     // validar se os dados foram preenchidos
 
-    if (!novoDesc || !novoValor || !tanqueSelecionadoId) {
+    if (
+      !novoPeso ||
+      !novoValor ||
+      !tanqueSelecionadoId ||
+      !novoGram ||
+      !novoTabela ||
+      !novoData
+    ) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
@@ -31,29 +42,33 @@ function RegistrarDespesaForm({ tanques, onRegistrar }: Props) {
     //chamar a função pai passando os dados
 
     onRegistrar({
-      descricao: novoDesc,
-      valor: novoValor,
-      data: novoData,
       tanqueId: tanqueSelecionadoId,
+      data: novoData,
+      pesoTotalKg: novoPeso,
+      valorTotal: novoValor,
+      gramatura: novoGram,
+      precoTabela: novoTabela,
     });
 
     //limpar os campos do formulario apos o envio
 
-    setNovoDesc("");
+    setNovoPeso("");
     setNovoValor("");
     setNovoData("");
     setTanqueSelecionadoId("");
+    setNovoGram("");
+    setNovoTabela("");
   };
 
   return (
     // O JSX do formulário virá aqui
     <form onSubmit={handleSubmit}>
-      <h2>Registrar Nova Despesa</h2>
+      <h2>Registrar Nova Venda</h2>
       <input
-        type="text"
-        value={novoDesc}
-        onChange={(e) => setNovoDesc(e.target.value)}
-        placeholder="Descrição"
+        type="number"
+        value={novoPeso}
+        onChange={(e) => setNovoPeso(e.target.value)}
+        placeholder="Peso total da despesca"
       />
       <input
         type="date"
@@ -67,7 +82,25 @@ function RegistrarDespesaForm({ tanques, onRegistrar }: Props) {
         type="number"
         value={novoValor}
         onChange={(e) => setNovoValor(e.target.value)}
-        placeholder="Valor"
+        placeholder="Valor Total da venda"
+        name=""
+        id=""
+      />
+
+      <input
+        type="number"
+        value={novoGram}
+        onChange={(e) => setNovoGram(e.target.value)}
+        placeholder="Gramatura do Camarao"
+        name=""
+        id=""
+      />
+
+      <input
+        type="number"
+        value={novoTabela}
+        onChange={(e) => setNovoTabela(e.target.value)}
+        placeholder="Valor da Tabela vendido"
         name=""
         id=""
       />
@@ -87,9 +120,9 @@ function RegistrarDespesaForm({ tanques, onRegistrar }: Props) {
         ))}
       </select>
 
-      <button type="submit">Registrar Despesa</button>
+      <button type="submit">Registrar Venda</button>
     </form>
   );
 }
 
-export default RegistrarDespesaForm;
+export default RegistrarVendaForm;

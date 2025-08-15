@@ -22,6 +22,16 @@ export interface Despesa {
   tanqueId: string;
 }
 
+export interface Venda {
+  id: string; // ID único da venda
+  tanqueId: string; // Para saber de qual tanque veio a venda
+  data: string; // Data em que a venda ocorreu
+  pesoTotalKg: number; // O peso total vendido que você mencionou
+  valorTotal: number; // O valor total recebido
+  gramatura: number; // A gramatura (ex: 10, 12, 14g) que meu pai usa
+  precoTabela: number; // O preço por kg naquela gramatura da tabela
+}
+
 function App() {
   //  ESTADOS GLOBAIS
   const dadosIniciaisDosTanques: Tanque[] = [
@@ -30,6 +40,7 @@ function App() {
   ];
   const [tanques, setTanques] = useState(dadosIniciaisDosTanques);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
+  const [vendas, setVendas] = useState<Venda[]>([]);
   const statusOptions = ["Em operação", "Vazio", "Manutenção"];
 
   // FUNÇOES DE MANIPULAÇÃO
@@ -92,24 +103,49 @@ function App() {
     setDespesas([...despesas, novaDespesa]);
   };
 
-  const handleDeletarDespesa = (idToDell: string)=>{
+  const handleDeletarDespesa = (idToDell: string) => {
     const newDespesa = despesas.filter((item) => item.id !== idToDell);
-    setDespesas(newDespesa)
+    setDespesas(newDespesa);
+  };
 
-  }
+  const handleAtualizarDespesa = (
+    idParaAtualizar: string,
+    novosDados: { descricao: string; valor: number; data: string }
+  ) => {
+    setDespesas(
+      despesas.map((despesa) => {
+        // Se encontrarmos a despesa com o ID correspondente...
+        if (despesa.id === idParaAtualizar) {
+          // ...retornamos um novo objeto com os dados antigos (...despesa)
+          // mas sobrescrevemos com os novos dados que recebemos.
+          return { ...despesa, ...novosDados };
+        }
+        // Se não for a despesa que queremos mudar, apenas a retornamos como estava.
+        return despesa;
+      })
+    );
+  };
 
-  const handleAtualizarDespesa  = (idParaAtualizar: string, novosDados: { descricao: string, valor: number, data: string }) =>{
-    setDespesas(despesas.map(despesa => {
-    // Se encontrarmos a despesa com o ID correspondente...
-    if (despesa.id === idParaAtualizar) {
-      // ...retornamos um novo objeto com os dados antigos (...despesa)
-      // mas sobrescrevemos com os novos dados que recebemos.
-      return { ...despesa, ...novosDados };
-    }
-    // Se não for a despesa que queremos mudar, apenas a retornamos como estava.
-    return despesa;
-  }));
-  }
+  const handleRegistrarVenda = (dadosDaVenda: {
+    tanqueId: string;
+    data: string;
+    pesoTotalKg: string;
+    valorTotal: string;
+    gramatura: string;
+    precoTabela: string;
+  }) => {
+    const novaVenda = {
+      id: new Date().toISOString(),
+      tanqueId: dadosDaVenda.tanqueId,
+      data: dadosDaVenda.data,
+      pesoTotalKg: parseFloat(dadosDaVenda.pesoTotalKg),
+      valorTotal: parseFloat(dadosDaVenda.valorTotal),
+      gramatura: parseFloat(dadosDaVenda.gramatura),
+      precoTabela: parseFloat(dadosDaVenda.precoTabela),
+    };
+    setVendas([...vendas, novaVenda]);
+  };
+
   // interface
   return (
     <div>
@@ -140,9 +176,11 @@ function App() {
             <FinanceiroPage
               tanques={tanques}
               despesas={despesas}
+              vendas={vendas}
               onRegistrarDespesa={handleRegistrarDespesa}
               onDeletarDespesa={handleDeletarDespesa}
               onEditarDespesa={handleAtualizarDespesa}
+              onRegistrarVenda={handleRegistrarVenda}
             />
           }
         />
