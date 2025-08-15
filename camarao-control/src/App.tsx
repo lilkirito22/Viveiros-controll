@@ -1,6 +1,7 @@
 // 1. Importamos as ferramentas do React Router
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
+import { supabase } from "./services/supabaseClient"; 
 // 2. Importamos nossos novos componentes de página
 import HomePage from "./pages/HomePage";
 import FinanceiroPage from "./pages/FinanceiroPage";
@@ -34,13 +35,36 @@ export interface Venda {
 
 function App() {
   //  ESTADOS GLOBAIS
-  const dadosIniciaisDosTanques: Tanque[] = [
-    { id: "t1", nome: "Tanque 01", status: "Em operação", lote: "LOTE-001" },
-    { id: "t2", nome: "Tanque 02", status: "Vazio", lote: "Nenhum" },
-  ];
-  const [tanques, setTanques] = useState(dadosIniciaisDosTanques);
+  
+  const [tanques, setTanques] = useState<Tanque[]>([]);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [vendas, setVendas] = useState<Venda[]>([]);
+
+  // Em App.tsx, dentro da função App()
+
+useEffect(() => {
+  // 1. Definimos uma função assíncrona para buscar os dados
+  async function buscarTanques() {
+    // 2. Usamos o cliente supabase para fazer a "query" (consulta)
+    //    A sintaxe é quase inglês: "do supabase, da tabela 'tanques', selecione tudo (*)"
+    const { data, error } = await supabase.from('tanques').select('*');
+
+    // 3. É uma boa prática sempre verificar se houve um erro
+    if (error) {
+      console.error('Erro ao buscar tanques:', error);
+    } else {
+      // 4. Se deu tudo certo, colocamos os dados que vieram do banco
+      //    de dados no nosso estado!
+      setTanques(data);
+    }
+  }
+
+  // 5. Chamamos a função que acabamos de criar para que ela seja executada.
+  buscarTanques();
+
+}, []); // O array vazio garante que isso rode só uma vez.
+
+
   const statusOptions = ["Em operação", "Vazio", "Manutenção"];
 
   // FUNÇOES DE MANIPULAÇÃO
