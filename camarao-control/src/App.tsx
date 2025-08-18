@@ -1,7 +1,7 @@
 // 1. Importamos as ferramentas do React Router
 import { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import { supabase } from "./services/supabaseClient"; 
+import { supabase } from "./services/supabaseClient";
 // 2. Importamos nossos novos componentes de página
 import HomePage from "./pages/HomePage";
 import FinanceiroPage from "./pages/FinanceiroPage";
@@ -35,99 +35,161 @@ export interface Venda {
 
 function App() {
   //  ESTADOS GLOBAIS
-  
+
   const [tanques, setTanques] = useState<Tanque[]>([]);
   const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [vendas, setVendas] = useState<Venda[]>([]);
 
   // Em App.tsx, dentro da função App()
 
-useEffect(() => {
-  // 1. Definimos uma função assíncrona para buscar os dados
-  async function buscarTanques() {
-    // 2. Usamos o cliente supabase para fazer a "query" (consulta)
-    //    A sintaxe é quase inglês: "do supabase, da tabela 'tanques', selecione tudo (*)"
-    const { data, error } = await supabase.from('tanques').select('*');
+  useEffect(() => {
+    // 1. Definimos uma função assíncrona para buscar os dados
+    async function buscarTanques() {
+      // 2. Usamos o cliente supabase para fazer a "query" (consulta)
+      //    A sintaxe é quase inglês: "do supabase, da tabela 'tanques', selecione tudo (*)"
+      const { data, error } = await supabase.from("tanques").select("*");
 
-    // 3. É uma boa prática sempre verificar se houve um erro
-    if (error) {
-      console.error('Erro ao buscar tanques:', error);
-    } else {
-      // 4. Se deu tudo certo, colocamos os dados que vieram do banco
-      //    de dados no nosso estado!
-      setTanques(data);
+      // 3. É uma boa prática sempre verificar se houve um erro
+      if (error) {
+        console.error("Erro ao buscar tanques:", error);
+      } else {
+        // 4. Se deu tudo certo, colocamos os dados que vieram do banco
+        //    de dados no nosso estado!
+        setTanques(data);
+      }
     }
-  }
+    async function buscarDespesas() {
+      const { data, error } = await supabase.from("despesas").select();
+      if (error) {
+        console.error("Erro ao buscar tanques:", error);
+      } else {
+        // 4. Se deu tudo certo, colocamos os dados que vieram do banco
+        //    de dados no nosso estado!
+        setDespesas(data);
+      }
+    }
 
-  // 5. Chamamos a função que acabamos de criar para que ela seja executada.
-  buscarTanques();
-
-}, []); // O array vazio garante que isso rode só uma vez.
-
+    // 5. Chamamos a função que acabamos de criar para que ela seja executada.
+    buscarTanques();
+    buscarDespesas();
+  }, []); // O array vazio garante que isso rode só uma vez.
 
   const statusOptions = ["Em operação", "Vazio", "Manutenção"];
 
   // FUNÇOES DE MANIPULAÇÃO
 
-  const handleAdicionarTanque = (dadosDoForm: {
+  const handleAdicionarTanque = async (dadosDoForm: {
     nome: string;
     status: string;
     lote: string;
   }) => {
-    // 2. Cria o objeto do novo tanque com os dados dos estados
-    const novoTanque = {
-      id: new Date().toISOString(), // Usamos a data como um ID único simples
-      // usando agora os dados que recebemos do filho
-      nome: dadosDoForm.nome,
-      status: dadosDoForm.status,
-      lote: dadosDoForm.lote,
-    };
+    const { data, error } = await supabase
+      .from("tanques")
+      .insert({
+        nome: dadosDoForm.nome,
+        status: dadosDoForm.status,
+        lote: dadosDoForm.lote,
+      })
+      .select();
 
-    // 3. A GRANDE MÁGICA: atualiza o estado dos tanques
-    //    Isso cria um NOVO array contendo todos os tanques antigos (...tanques)
-    //    mais o novoTanque no final. O React detecta essa mudança e redesenha a tela!
-    setTanques([...tanques, novoTanque]);
+    if (error) {
+      console.error("Erro ao adicionar tanque:", error);
+      return; // Para a execução se deu erro
+    }
+
+    const tanqueRecemCriado = data[0];
+
+    setTanques([...tanques, tanqueRecemCriado]);
   };
 
-  const handleDeletarTanque = (idToDel: string) => {
+  const handleDeletarTanque = async (idToDel: string) => {
+    const { error } = await supabase.from("tanques").delete().eq("id", idToDel);
+
+    if (error) {
+      console.error("Erro ao adicionar tanque:", error);
+      return; // Para a execução se deu erro
+    }
     const newTanque = tanques.filter((item) => item.id !== idToDel);
     setTanques(newTanque);
   };
 
-  const handleMudarStatus = (idParaMudar: string) => {
-    setTanques((prev) =>
-      prev.map((tanque) => {
-        if (tanque.id === idParaMudar) {
-          let novoStatus = "";
-          if (tanque.status == "Em operação") novoStatus = "Vazio";
-          else if (tanque.status === "Vazio") novoStatus = "Manuntenção";
-          else novoStatus = "Em operação";
+  const handleMudarStatus = async (idParaMudar: string) => {
+    // 1. Encontrar o tanque no nosso estado atual
+    const tanqueAtual = tanques.find((t) => t.id === idParaMudar);
 
-          return { ...tanque, status: novoStatus };
+    // Se, por algum motivo, o tanque não for encontrado, paramos aqui.
+    if (!tanqueAtual) {
+      console.error("Tanque não encontrado!");
+      return;
+    }
+
+    // 2. Calcular qual será o próximo status
+    let proximoStatus = "";
+    if (tanqueAtual.status === "Em operação") proximoStatus = "Vazio";
+    else if (tanqueAtual.status === "Vazio")
+      proximoStatus = "Manutenção"; // Corrigi o typo "Manuntenção"
+    else proximoStatus = "Em operação";
+
+    // 3. Atualizar o Supabase COM O VALOR CORRETO
+    const { error } = await supabase
+      .from("tanques")
+      .update({ status: proximoStatus }) // Usando a variável que calculamos
+      .eq("id", idParaMudar);
+
+    if (error) {
+      console.error("Erro ao atualizar status:", error);
+      return;
+    }
+
+    // 4. Atualizar o estado local do React
+    //    Não precisamos mais do retorno do Supabase aqui, pois já sabemos qual o próximo status
+    setTanques(
+      tanques.map((tanque) => {
+        if (tanque.id === idParaMudar) {
+          // Apenas aplicamos a mudança que já calculamos
+          return { ...tanque, status: proximoStatus };
         }
         return tanque;
       })
     );
   };
-
-  const handleRegistrarDespesa = (dadosDaDespesa: {
+  const handleRegistrarDespesa = async (dadosDaDespesa: {
     descricao: string;
     valor: string;
     data: string;
     tanqueId: string;
   }) => {
-    const novaDespesa = {
-      id: new Date().toISOString(),
-      tanqueId: dadosDaDespesa.tanqueId,
-      descricao: dadosDaDespesa.descricao,
-      data: dadosDaDespesa.data,
-      valor: parseFloat(dadosDaDespesa.valor),
-    };
+    const { data, error } = await supabase
+      .from("despesas")
+      .insert({
+        tanqueId: dadosDaDespesa.tanqueId,
+        descricao: dadosDaDespesa.descricao,
+        data: dadosDaDespesa.data,
+        valor: parseFloat(dadosDaDespesa.valor),
+      })
+      .select();
 
-    setDespesas([...despesas, novaDespesa]);
+    if (error) {
+      console.error("Erro ao adicionar despesa:", error);
+      return; // Para a execução se deu erro
+    }
+
+    const despesaRecemCriada = data[0];
+    setDespesas([...despesas, despesaRecemCriada]);
   };
 
-  const handleDeletarDespesa = (idToDell: string) => {
+  const handleDeletarDespesa = async (idToDell: string) => {
+    const { error } = await supabase
+      .from("despesas")
+      .delete()
+      .eq("id", idToDell)
+      .select();
+
+    if (error) {
+      console.error("Erro ao adicionar tanque:", error);
+      return; // Para a execução se deu erro
+    }
+
     const newDespesa = despesas.filter((item) => item.id !== idToDell);
     setDespesas(newDespesa);
   };
