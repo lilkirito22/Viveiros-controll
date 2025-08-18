@@ -2,6 +2,7 @@
 
 import { type Tanque, type Despesa, type Venda } from "../App"; // 1. Importando os tipos
 import DespesaCard from "../components/DespesaCard";
+import VendasCard from "../components/VendasCard";
 import RegistrarDespesaForm from "../components/RegistrarDespesaForm";
 import RegistrarVendaForm from "../components/RegistrarVendaForm";
 
@@ -34,6 +35,19 @@ type FinanceiroPageProps = {
     gramatura: string;
     precoTabela: string;
   }) => void;
+
+  onDeletarVenda: (id: string) => void;
+  // Adicionamos a prop para atualizar, que vem lá do App.tsx
+  onEditarVenda: (
+    id: string,
+    novosDados: {
+      data: string;
+      pesoTotalKg: number;
+      valorTotal: number;
+      gramatura: number;
+      precoTabela: number;
+    }
+  ) => void;
 };
 
 // 3. Recebendo as props na função
@@ -45,6 +59,8 @@ function FinanceiroPage({
   onDeletarDespesa,
   onEditarDespesa,
   onRegistrarVenda,
+  onEditarVenda,
+  onDeletarVenda,
 }: FinanceiroPageProps) {
   // Por enquanto, podemos mostrar um contador de despesas registradas
   // E também o formulário para registrar novas despesas
@@ -78,6 +94,34 @@ function FinanceiroPage({
             data={despesa.data}
             onDelete={onDeletarDespesa}
             onEditar={onEditarDespesa}
+          />
+        ))}
+      </div>
+
+      {/* --- SEÇÃO DE EXIBIÇÃO DAS VENDAS --- */}
+      <hr />
+      <h3>Vendas Registradas</h3>
+      <div
+        className="lista-de-vendas"
+        style={{ display: "flex", flexWrap: "wrap" }}
+      >
+        {/* Mapeamos o array 'vendas' que a página recebe via props */}
+        {vendas.map((venda) => (
+          <VendasCard
+            // A "matrícula" para o React saber quem é quem na lista
+            key={venda.id}
+            // As props com os dados da venda
+            id={venda.id}
+            tanqueId={venda.tanqueId}
+            data={venda.data}
+            pesoTotalKg={venda.pesoTotalKg}
+            valorTotal={venda.valorTotal}
+            gramatura={venda.gramatura}
+            precoTabela={venda.precoTabela}
+            // As props com as FUNÇÕES que vêm lá do App.tsx
+            // (Assumindo que você as nomeou assim nas props da página)
+            onDelete={onDeletarVenda}
+            onEditar={onEditarVenda}
           />
         ))}
       </div>

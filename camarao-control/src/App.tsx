@@ -69,9 +69,21 @@ function App() {
       }
     }
 
+    async function buscarVendas() {
+      const { data, error } = await supabase.from("vendas").select();
+      if (error) {
+        console.error("Erro ao buscar vendas:", error);
+      } else {
+        // 4. Se deu tudo certo, colocamos os dados que vieram do banco
+        //    de dados no nosso estado!
+        setVendas(data);
+      }
+    }
+
     // 5. Chamamos a função que acabamos de criar para que ela seja executada.
     buscarTanques();
     buscarDespesas();
+    buscarVendas();
   }, []); // O array vazio garante que isso rode só uma vez.
 
   const statusOptions = ["Em operação", "Vazio", "Manutenção"];
@@ -194,10 +206,21 @@ function App() {
     setDespesas(newDespesa);
   };
 
-  const handleAtualizarDespesa = (
+  const handleAtualizarDespesa = async (
     idParaAtualizar: string,
     novosDados: { descricao: string; valor: number; data: string }
   ) => {
+    // 3. Atualizar o Supabase COM O VALOR CORRETO
+    const { error } = await supabase
+      .from("despesas")
+      .update(novosDados) // Usando a variável que calculamos
+      .eq("id", idParaAtualizar);
+
+    if (error) {
+      console.error("Erro ao atualizar status:", error);
+      return;
+    }
+
     setDespesas(
       despesas.map((despesa) => {
         // Se encontrarmos a despesa com o ID correspondente...
@@ -212,7 +235,7 @@ function App() {
     );
   };
 
-  const handleRegistrarVenda = (dadosDaVenda: {
+  const handleRegistrarVenda = async (dadosDaVenda: {
     tanqueId: string;
     data: string;
     pesoTotalKg: string;
@@ -220,18 +243,79 @@ function App() {
     gramatura: string;
     precoTabela: string;
   }) => {
-    const novaVenda = {
-      id: new Date().toISOString(),
-      tanqueId: dadosDaVenda.tanqueId,
-      data: dadosDaVenda.data,
-      pesoTotalKg: parseFloat(dadosDaVenda.pesoTotalKg),
-      valorTotal: parseFloat(dadosDaVenda.valorTotal),
-      gramatura: parseFloat(dadosDaVenda.gramatura),
-      precoTabela: parseFloat(dadosDaVenda.precoTabela),
-    };
-    setVendas([...vendas, novaVenda]);
+    const { data, error } = await supabase
+      .from("vendas")
+      .insert({
+        tanqueId: dadosDaVenda.tanqueId,
+        data: dadosDaVenda.data,
+        pesoTotalKg: parseFloat(dadosDaVenda.pesoTotalKg),
+        valorTotal: parseFloat(dadosDaVenda.valorTotal),
+        gramatura: parseFloat(dadosDaVenda.gramatura),
+        precoTabela: parseFloat(dadosDaVenda.precoTabela),
+      })
+      .select();
+
+    if (error) {
+      console.error("Erro ao adicionar despesa:", error);
+      return; // Para a execução se deu erro
+    }
+
+    const vendaRecemCriada = data[0];
+    setVendas([...vendas, vendaRecemCriada]);
   };
 
+  const handleAtualizarVenda = async (
+    idParaAtualizar: string,
+    novosDados: {
+      data: string;
+      pesoTotalKg: number;
+      valorTotal: number;
+      gramatura: number;
+      precoTabela: number;
+    }
+  ) => {
+
+    const { error } = await supabase
+      .from("vendas")
+      .update(novosDados) // Usando a variável que calculamos
+      .eq("id", idParaAtualizar);
+
+    if (error) {
+      console.error("Erro ao atualizar a venda:", error);
+      return;
+    }
+
+    setVendas(
+      vendas.map((venda) => {
+        // Se encontrarmos a despesa com o ID correspondente...
+        if (venda.id === idParaAtualizar) {
+          // ...retornamos um novo objeto com os dados antigos (...despesa)
+          // mas sobrescrevemos com os novos dados que recebemos.
+          return { ...venda, ...novosDados };
+        }
+        // Se não for a despesa que queremos mudar, apenas a retornamos como estava.
+        return venda;
+      })
+    );
+
+
+
+  };
+const handleDeletarVenda = async (idToDell: string) => {
+    const { error } = await supabase
+      .from("vendas")
+      .delete()
+      .eq("id", idToDell)
+      .select();
+
+    if (error) {
+      console.error("Erro ao deletar venda:", error);
+      return; // Para a execução se deu erro
+    }
+
+    const newVenda = vendas.filter((item) => item.id !== idToDell);
+    setVendas(newVenda);
+  };
   // interface
   return (
     <div>
@@ -267,6 +351,8 @@ function App() {
               onDeletarDespesa={handleDeletarDespesa}
               onEditarDespesa={handleAtualizarDespesa}
               onRegistrarVenda={handleRegistrarVenda}
+              onEditarVenda ={handleAtualizarVenda}
+              onDeletarVenda ={handleDeletarVenda}
             />
           }
         />
