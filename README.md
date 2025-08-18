@@ -9,7 +9,8 @@ Um sistema de gestão completo para aquicultura, focado em viveiros de camarão.
 
 ---
 
-![Prévia do Viveiro Control](EM-BREVE)
+![Prévia do Viveiro Control](/camarao-control/src/assets/prints/Captura%20de%20tela%202025-08-18%20120430.png)
+![Outra previa do Viveiro Control](/camarao-control/src/assets/prints/Captura%20de%20tela%202025-08-18%20120444.png)
 
 ## 📖 Sobre o Projeto
 
