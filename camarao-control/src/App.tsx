@@ -5,6 +5,7 @@ import { supabase } from "./services/supabaseClient";
 // 2. Importamos nossos novos componentes de página
 import HomePage from "./pages/HomePage";
 import FinanceiroPage from "./pages/FinanceiroPage";
+import Layout from "./components/Layout";
 
 // Tipagem (Nossos "Moldes" de Dados)
 // Usamos 'export' para que outros arquivos possam importar esses moldes
@@ -320,14 +321,12 @@ const handleDeletarVenda = async (idToDell: string) => {
   return (
     <div>
       {/* 3. Criamos um menu de navegação simples */}
-      <nav>
-        <Link to="/">Viveiros</Link> | <Link to="/financeiro">Financeiro</Link>
-      </nav>
-
+     
       <hr />
 
       {/* PALCO ONDE AS PAGINAS SAO TROCADAS */}
       <Routes>
+        <Route element={<Layout />}>
         <Route
           path="/"
           element={
@@ -356,6 +355,7 @@ const handleDeletarVenda = async (idToDell: string) => {
             />
           }
         />
+        </Route>
       </Routes>
     </div>
   );
