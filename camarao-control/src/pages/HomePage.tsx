@@ -35,7 +35,7 @@ function HomePage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-green-500 underline">
+      <h1 >
         Gerenciamento de Viveiros
       </h1>
 

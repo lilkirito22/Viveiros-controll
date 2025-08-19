@@ -22,14 +22,7 @@ function TanqueCard({
   onEdite,
 }: TanqueCardProps) {
   return (
-    <div
-      style={{
-        border: "1px solid black",
-        padding: "16px",
-        margin: "16px",
-        borderRadius: "8px",
-      }}
-    >
+    <div className="m-4 w-80 rounded-lg border border-gray-200 bg-white p-6 shadow-md"  >
       {/* 3. Em vez de texto fixo, usamos as variáveis que recebemos via props. */}
       <h2>{nomeDoTanque}</h2>
       <p>{status}</p>
