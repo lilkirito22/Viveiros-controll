@@ -22,15 +22,42 @@ function TanqueCard({
   onEdite,
 }: TanqueCardProps) {
   return (
-    <div className="m-4 w-80 rounded-lg border border-gray-200 bg-white p-6 shadow-md"  >
-      {/* 3. Em vez de texto fixo, usamos as variáveis que recebemos via props. */}
-      <h2>{nomeDoTanque}</h2>
-      <p>{status}</p>
-      <p>Lote Atual: {loteAtual}</p>
+// Opção C: Robusto e Informativo
+<div className="m-4 w-80 overflow-hidden rounded-lg bg-slate-50 shadow-md ring-1 ring-slate-200">
+  {/* Barra de Status Colorida no Topo */}
+  <div className="h-2 bg-green-500"></div>
 
-      <button onClick={() => onDelete(idDoTanque)}>Deletar</button>
-      <button onClick={() => onEdite(idDoTanque)}>Mudar Status</button>
+  <div className="flex flex-col justify-between p-6">
+    {/* Cabeçalho */}
+    <div>
+      <h2 className="text-lg font-bold text-slate-800">{nomeDoTanque}</h2>
+      <p className="text-sm text-slate-500">Status: {status}</p>
     </div>
+
+    {/* Corpo */}
+    <div className="my-4 rounded-md border border-slate-200 bg-white p-3">
+      <p className="text-sm font-medium text-slate-700">Lote Atual</p>
+      <p className="text-lg text-slate-900">{loteAtual}</p>
+    </div>
+
+    {/* Rodapé com os Botões */}
+    <div className="mt-2 flex justify-end gap-3">
+      {/* Botão com estilo "outline" */}
+      <button
+        onClick={() => onDelete(idDoTanque)}
+        className="rounded-md px-3 py-1.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 transition-all hover:bg-red-50"
+      >
+        Deletar
+      </button>
+      <button
+        onClick={() => onEdite(idDoTanque)}
+        className="rounded-md bg-slate-700 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800"
+      >
+        Mudar Status
+      </button>
+    </div>
+  </div>
+</div>
   );
 }
 

@@ -1,6 +1,9 @@
 // src/components/DespesaCard.tsx
 
 import { useState } from "react";
+// Importamos o "molde" Tanque para usar nas props, se necessário
+import { type Despesa } from "../App";
+
 
 type DespesaCardProps = {
   id: string;
@@ -9,8 +12,10 @@ type DespesaCardProps = {
   valor: number;
   data: string;
   onDelete: (id: string) => void;
-  // Adicionamos a prop para atualizar, que vem lá do App.tsx
-  onEditar: (id: string, novosDados: { descricao: string; valor: number; data: string }) => void;
+  onEditar: (
+    id: string,
+    novosDados: { descricao: string; valor: number; data: string }
+  ) => void;
 };
 
 function DespesaCard({
@@ -22,86 +27,111 @@ function DespesaCard({
   onDelete,
   onEditar,
 }: DespesaCardProps) {
-  // --- ESTADOS LOCAIS DO CARD ---
-
-  // 1. O "Interruptor" que controla se estamos em modo de edição ou visualização.
   const [estaEditando, setEstaEditando] = useState(false);
-
-  // 2. Estados temporários para guardar o que o usuário digita nos inputs de edição.
-  //    Iniciamos eles com os valores atuais da despesa (vindas das props).
   const [descEditada, setDescEditada] = useState(descricao);
-  const [valorEditado, setValorEditado] = useState(String(valor)); // Inputs de número funcionam melhor com strings
+  const [valorEditado, setValorEditado] = useState(String(valor));
   const [dataEditada, setDataEditada] = useState(data);
 
-  // --- FUNÇÕES LOCAIS ---
-
-  // 3. Função chamada quando o botão "Salvar" é clicado.
   const handleSalvar = () => {
-    // Validação para garantir que o valor não é vazio
-    if (!valorEditado) {
-      alert("O valor não pode ficar em branco.");
+    if (!valorEditado || !descEditada) {
+      alert("A descrição e o valor não podem ficar em branco.");
       return;
     }
-    
-    // Avisa ao "pai" (App.tsx) para rodar a lógica de atualização,
-    // enviando o ID da despesa e os novos dados coletados dos estados locais.
     onEditar(id, {
       descricao: descEditada,
-      valor: parseFloat(valorEditado), // Converte o valor de volta para número
+      valor: parseFloat(valorEditado),
       data: dataEditada,
     });
-
-    // Desliga o modo de edição para voltar à visualização normal.
     setEstaEditando(false);
   };
 
   return (
-    <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '16px', margin: '10px', width: '300px' }}>
-      
-      {/* 4. AQUI ESTÁ A RENDERIZAÇÃO CONDICIONAL */}
-      {estaEditando ? (
-        // ============ SE ESTIVÉR EDITANDO (true), MOSTRAR ISSO: ============
-        <>
-          <input
-            type="text"
-            value={descEditada}
-            onChange={(e) => setDescEditada(e.target.value)}
-            style={{ marginBottom: '8px', width: '95%' }}
-          />
-          <input
-            type="number"
-            value={valorEditado}
-            onChange={(e) => setValorEditado(e.target.value)}
-            style={{ marginBottom: '8px', width: '95%' }}
-          />
-          <input
-            type="date"
-            value={dataEditada}
-            onChange={(e) => setDataEditada(e.target.value)}
-            style={{ marginBottom: '8px', width: '95%' }}
-          />
-          <hr />
-          <button onClick={handleSalvar} style={{ marginRight: '10px' }}>Salvar</button>
-          <button onClick={() => setEstaEditando(false)}>Cancelar</button>
-        </>
-      ) : (
-        // ============ SE NÃO ESTIVER EDITANDO (false), MOSTRAR ISSO: ============
-        <>
-          <h4>{descricao}</h4>
-          <p>
-            <strong>Valor:</strong> {valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </p>
-          <p>
-            <strong>Data:</strong> {data}
-          </p>
-          <p><small>ID do Tanque: {tanqueId}</small></p>
-          <hr style={{ margin: '10px 0' }} />
-          <div>
-            <button onClick={() => setEstaEditando(true)} style={{ marginRight: '10px' }}>Editar</button>
-            <button onClick={() => onDelete(id)}>Deletar</button>
+    // Adicionamos 'flex flex-col' para que o card se estique verticalmente se precisar
+    <div className={`m-4 flex w-80 flex-col overflow-hidden rounded-lg bg-slate-50 shadow-md ring-1 ${estaEditando ? 'ring-2 ring-sky-500' : 'ring-slate-200'}`}>
+      {/* Barra de status no topo */}
+      <div className="h-2 bg-red-500"></div>
+
+      {/* Container principal com padding, que será flex e terá um espaçamento (gap) entre os filhos */}
+      <div className="flex h-full flex-col justify-between p-6">
+        {estaEditando ? (
+          // ============ MODO DE EDIÇÃO ============
+          // Usamos 'flex flex-col' e 'gap-4' para criar espaçamento vertical entre os inputs
+          <div className="flex flex-grow flex-col gap-4">
+            <div>
+              <label htmlFor="descricao" className="block text-xs font-medium text-slate-600">Descrição</label>
+              <textarea
+                id="descricao"
+                value={descEditada}
+                onChange={(e) => setDescEditada(e.target.value)}
+                rows={2}
+                // Aumentamos o tamanho do texto do input com 'text-base'
+                className="mt-1 block w-full rounded-md border-gray-300 text-base shadow-sm focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="valor" className="block text-xs font-medium text-slate-600">Valor (R$)</label>
+              <input
+                id="valor"
+                type="number"
+                value={valorEditado}
+                onChange={(e) => setValorEditado(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 text-base shadow-sm focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="data" className="block text-xs font-medium text-slate-600">Data</label>
+              <input
+                id="data"
+                type="date"
+                value={dataEditada}
+                onChange={(e) => setDataEditada(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 text-base shadow-sm focus:border-sky-500 focus:ring-sky-500"
+              />
+            </div>
+
+            {/* Botões de ação do modo de edição */}
+            <div className="mt-2 flex justify-end gap-3 border-t pt-4">
+              <button onClick={() => setEstaEditando(false)} className="rounded-md px-3 py-1.5 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-300 transition-all hover:bg-slate-100">
+                Cancelar
+              </button>
+              <button onClick={handleSalvar} className="rounded-md bg-green-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-green-600">
+                Salvar
+              </button>
+            </div>
           </div>
-        </>
-      )}
+        ) : (
+          // ============ MODO DE VISUALIZAÇÃO ============
+          // 'flex-grow' faz esta seção ocupar o espaço disponível, empurrando os botões para baixo
+          <div className="flex flex-grow flex-col">
+            <h4 className="text-xl font-bold text-slate-800">{descricao}</h4>
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-slate-700">
+                <strong>Valor:</strong>
+                <span className="ml-2 text-lg font-semibold text-red-600">
+                  {valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </span>
+              </p>
+              <p className="text-sm text-slate-700">
+                <strong>Data:</strong> {data}
+              </p>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              ID do Tanque: {tanqueId}
+            </p>
+            {/* Botões de ação do modo de visualização */}
+            <div className="mt-4 flex justify-end gap-3 border-t pt-4">
+              <button onClick={() => setEstaEditando(true)} className="rounded-md bg-violet-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-violet-600">
+                Editar
+              </button>
+              <button onClick={() => onDelete(id)} className="rounded-md px-3 py-1.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 transition-all hover:bg-red-50">
+                Deletar
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
