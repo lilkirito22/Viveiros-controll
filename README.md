@@ -1,97 +1,69 @@
-# 🦐 Viveiro Control
+# React + TypeScript + Vite
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
-![Licença](https://img.shields.io/badge/license-MIT-green)
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Um sistema de gestão completo para aquicultura, focado em viveiros de camarão. Desenvolvido com as tecnologias mais modernas de front-end e back-end.
+Currently, two official plugins are available:
 
-**[Acesse a versão ao vivo do projeto aqui!] (EM-BREVE)**
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
----
+## Expanding the ESLint configuration
 
-![Prévia do Viveiro Control](/camarao-control/src/assets/prints/Captura%20de%20tela%202025-08-18%20120430.png)
-![Outra previa do Viveiro Control](/camarao-control/src/assets/prints/Captura%20de%20tela%202025-08-18%20120444.png)
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## 📖 Sobre o Projeto
+```js
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-O Viveiro Control nasceu da necessidade de aplicar meus conhecimentos em desenvolvimento web para resolver um problema do mundo real. Meu pai gerencia viveiros de camarão e sempre precisou de uma ferramenta simples e eficaz para controlar os custos, as vendas e o desempenho de cada ciclo de produção.
+      // Remove tseslint.configs.recommended and replace with this
+      ...tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      ...tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      ...tseslint.configs.stylisticTypeChecked,
 
-Este projeto é a solução, construído para ser uma aplicação web rápida, intuitiva e completa, que ajuda produtores de aquicultura a tomar decisões melhores baseadas em dados.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
----
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-## 🚀 Funcionalidades
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-- [x] **Gestão de Viveiros:** CRUD completo (Criar, Ler, Atualizar, Deletar) para os viveiros.
-- [x] **Controle de Despesas:** CRUD completo para registrar todos os custos associados a cada viveiro.
-- [x] **Controle de Vendas:** CRUD completo para registrar os dados de cada despesca (venda).
-- [x] **Persistência de Dados:** Todos os dados são salvos em um banco de dados na nuvem com Supabase.
-- [x] **Arquitetura Multi-Página:** Navegação fluida entre diferentes seções do app com React Router.
-- [ ] **Dashboard Financeiro:** Visualização de totais, lucro e gráficos para análise de desempenho.
-- [ ] **Autenticação de Usuários:** Sistema de login para proteger os dados.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-Este projeto foi construído utilizando as seguintes tecnologias:
-
-- **Front-End:**
-
-  - [React](https://react.dev/)
-  - [TypeScript](https://www.typescriptlang.org/)
-  - [Vite](https://vitejs.dev/)
-  - [React Router](https://reactrouter.com/)
-  - [Recharts](https://recharts.org/) (para os gráficos)
-
-- **Back-End & Infra:**
-  - [Supabase](https://supabase.com/) (Banco de Dados PostgreSQL e APIs)
-  - [Vercel](https://vercel.com/) (Hospedagem e Deploy Contínuo)
-
----
-
-## ⚙️ Como Rodar o Projeto Localmente
-
-Para rodar este projeto na sua máquina, siga os passos abaixo.
-
-### Pré-requisitos
-
-- [Node.js](https://nodejs.org/) (versão LTS)
-- [Git](https://git-scm.com/)
-
-### Instalação
-
-1.  Clone o repositório:
-    ```bash
-    git clone [https://github.com/](https://github.com/)[seu-usuario-github]/[nome-do-repositorio].git
-    ```
-2.  Navegue até a pasta do projeto e instale as dependências:
-    ```bash
-    cd [nome-do-repositorio]
-    npm install
-    ```
-3.  Crie um arquivo `.env.local` na raiz do projeto e adicione suas chaves do Supabase, seguindo o exemplo do arquivo `.env.example`.
-    ```
-    VITE_SUPABASE_URL="sua-url-do-supabase"
-    VITE_SUPABASE_ANON_KEY="sua-chave-anon-publica"
-    ```
-4.  Rode o servidor de desenvolvimento:
-    ```bash
-    npm run dev
-    ```
-5.  Abra [http://localhost:5173](http://localhost:5173) no seu navegador para ver o resultado.
-
----
-
-## 📜 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE.md) para mais detalhes.
-
----
-
-## 👨‍💻 Autor
-
-**[Daniel Chaves Castro]**
-
-- LinkedIn: [https://www.linkedin.com/in/daniel-chaves-castro/](https://www.linkedin.com/in/daniel-chaves-castro/)
-- GitHub: [@lilkirito22](https://github.com/lilkirito22)
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
